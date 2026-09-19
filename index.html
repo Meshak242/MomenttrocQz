@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Moment Troc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F4EE;
+    --surface: #FFFFFF;
+    --ink: #1E1C19;
+    --muted: #8C8577;
+    --border: #E4DFD4;
+    --accent: #4E5D94;
+    --accent-ink: #FFFFFF;
+    --accent-light: #E7E9F4;
+    --go: #4F7A5D;
+    --go-light: #E3ECE6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #17181B;
+      --surface: #1F2024;
+      --ink: #F3F1EC;
+      --muted: #9C978A;
+      --border: #33343A;
+      --accent: #8C9AD6;
+      --accent-ink: #14161C;
+      --accent-light: #2B2E44;
+      --go: #7FAE8E;
+      --go-light: #223129;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #17181B; --surface: #1F2024; --ink: #F3F1EC; --muted: #9C978A;
+    --border: #33343A; --accent: #8C9AD6; --accent-ink: #14161C;
+    --accent-light: #2B2E44; --go: #7FAE8E; --go-light: #223129;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100dvh;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+  .stage {
+    width: 100%;
+    max-width: 560px;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    padding: 28px 22px 34px;
+  }
+  @media (min-width: 620px) {
+    .stage { min-height: 88vh; margin: 6vh auto; border-radius: 20px; background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 12px 40px rgba(30,28,25,0.08); border: 1px solid var(--border); }
+  }
+
+  .progress-track {
+    height: 3px;
+    width: 100%;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 30px;
+    flex-shrink: 0;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    transition: width 0.4s cubic-bezier(.4,0,.2,1);
+  }
+
+  .screen {
+    flex: 1;
+    display: none;
+    flex-direction: column;
+  }
+  .screen.active { display: flex; }
+  .screen.animate-in { animation: rise 0.38s cubic-bezier(.2,.8,.2,1); }
+  @media (prefers-reduced-motion: reduce) {
+    .screen.animate-in { animation: none; }
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Intro */
+  .intro-eyebrow {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--accent);
+    margin: 0 0 14px;
+  }
+  .intro-hook {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 2rem;
+    line-height: 1.22;
+    margin: 0 0 18px;
+    letter-spacing: -0.01em;
+  }
+  .intro-sub {
+    color: var(--muted);
+    font-size: 0.98rem;
+    line-height: 1.55;
+    margin: 0 0 auto;
+    max-width: 46ch;
+  }
+  .intro-meta {
+    display: flex;
+    gap: 18px;
+    margin-top: 34px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  /* Buttons */
+  .btn {
+    appearance: none;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 22px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+  .btn:active { transform: scale(0.985); }
+  .btn-accent { background: var(--accent); color: var(--accent-ink); }
+  .btn-go { background: var(--go); color: #fff; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    font-weight: 500;
+    text-decoration: underline;
+  }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-row { margin-top: auto; padding-top: 24px; display: flex; flex-direction: column; gap: 10px; }
+
+  /* Question */
+  .q-count {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin: 0 0 10px;
+  }
+  .q-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: 1.5rem;
+    line-height: 1.32;
+    margin: 0 0 22px;
+  }
+  .answers { display: flex; flex-direction: column; gap: 10px; }
+  .answer {
+    text-align: left;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 15px 16px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: var(--ink);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  @media (min-width: 620px) { .answer { background: var(--bg); } }
+  .answer:hover { border-color: var(--accent); }
+  .answer.selected {
+    border-color: var(--accent);
+    background: var(--accent-light);
+    font-weight: 700;
+  }
+
+  /* Contact form */
+  .field-group { margin-bottom: 16px; }
+  .field-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  input[type="text"], input[type="email"], input[type="tel"] {
+    width: 100%;
+    padding: 13px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 0.98rem;
+  }
+  input:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+
+  /* Final */
+  .final-icon {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--go-light); color: var(--go);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; margin-bottom: 20px;
+  }
+  .final-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600; font-size: 1.7rem; margin: 0 0 12px; line-height: 1.3;
+  }
+  .final-sub { color: var(--muted); font-size: 0.95rem; line-height: 1.55; margin: 0 0 auto; }
+  .spinner {
+    width: 26px; height: 26px; border-radius: 50%;
+    border: 3px solid var(--border); border-top-color: var(--accent);
+    animation: spin 0.8s linear infinite; margin: 40px auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 1.6s; } }
+
+  /* Config mode */
+  .cfg-title { font-family: 'Cormorant Garamond', serif; font-weight: 600; font-size: 1.6rem; margin: 0 0 6px; }
+  .cfg-sub { color: var(--muted); font-size: 0.9rem; margin: 0 0 26px; }
+  .cfg-out {
+    background: var(--accent-light);
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 0.82rem;
+    word-break: break-all;
+    color: var(--ink);
+    margin-top: 16px;
+    display: none;
+  }
+  .error-text { color: #A14444; font-size: 0.85rem; margin-top: -8px; margin-bottom: 14px; display: none; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="progress-track" id="progressTrack" style="display:none;"><div class="progress-fill" id="progressFill"></div></div>
+  <div id="screens"></div>
+</div>
+
+<script>
+/* ============ DATA ============ */
+const CATS = ["auto","elev","lib","oval","oprix"];
+
+const QUESTIONS = [
+  { text: "Deux produits similaires en magasin, même utilité. Ce qui te fait choisir l'un plutôt que l'autre :",
+    a: { auto:"Celui que d'autres recommandent le plus", elev:"Celui qui a la meilleure image", lib:"Celui que tu peux facilement rendre si ça ne va pas", oval:"Celui qui te fait gagner du temps tout de suite", oprix:"Celui qui coûte le moins pour un usage identique" },
+    order: ["auto","elev","lib","oval","oprix"] },
+  { text: "Une pub te promet un résultat qui t'intéresse vraiment. Ta première réaction :",
+    a: { auto:"Je me demande si ça va marcher pour moi précisément", elev:"Je me demande si ce sera vu comme un bon choix par mon entourage", lib:"Je regarde d'abord les conditions de retour avant de cliquer", oval:"Je regarde en combien de temps j'aurai le résultat", oprix:"Je compare vite avec des alternatives moins chères" },
+    order: ["elev","lib","oval","oprix","auto"] },
+  { text: "Un vendeur essaie de te convaincre d'acheter maintenant. Ce qui te fait vraiment basculer :",
+    a: { auto:"Une preuve concrète que ça a marché pour quelqu'un comme toi", elev:"Sentir que ce produit te distinguera des autres", lib:"Savoir que tu n'es engagé à rien si ça ne convient pas", oval:"Une réponse claire et rapide sur le résultat, sans blabla", oprix:"Une réduction ou un prix qui te semble juste" },
+    order: ["lib","oval","oprix","auto","elev"] },
+  { text: "Tu hésites devant un produit un peu cher pour toi. Ce qui te bloque le plus :",
+    a: { auto:"La peur de ne pas savoir bien l'utiliser une fois chez toi", elev:"La peur que ce ne soit pas le bon choix aux yeux des autres", lib:"La peur de rester coincé avec un mauvais achat", oval:"La peur de perdre du temps avant de voir si ça marche", oprix:"La peur de payer plus cher qu'ailleurs pour pareil" },
+    order: ["oval","oprix","auto","elev","lib"] },
+  { text: "Après avoir acheté, ce qui te fait dire « j'ai bien fait » :",
+    a: { auto:"Ça fonctionne exactement comme annoncé, sans galère", elev:"La réaction admirative de ceux à qui tu le montres", lib:"Savoir que tu aurais pu reculer si ça avait mal tourné", oval:"Avoir eu le résultat plus vite que prévu", oprix:"Avoir eu le meilleur prix pour ce type de produit" },
+    order: ["oprix","auto","elev","lib","oval"] },
+  { text: "Deux offres identiques, présentées différemment. Celle qui te convainc :",
+    a: { auto:"Celle qui montre étape par étape ce qui se passe après l'achat", elev:"Celle qui donne le sentiment d'accéder à quelque chose d'exclusif", lib:"Celle qui insiste sur « sans engagement »", oval:"Celle qui va droit au résultat, sans détour", oprix:"Celle qui insiste sur le prix ou l'économie réalisée" },
+    order: ["auto","elev","lib","oval","oprix"] },
+  { text: "On te propose d'essayer avant de payer. Ce que ça change pour toi :",
+    a: { auto:"Ça enlève le doute que ça ne marche pas pour toi", elev:"Pas grand-chose — ce qui compte, c'est ce que ça représente une fois acheté", lib:"Beaucoup, tu détestes t'engager sans avoir testé", oval:"Peu, tant que t'as vite la preuve d'un résultat", oprix:"Ça évite surtout de payer pour rien" },
+    order: ["elev","lib","oval","oprix","auto"] },
+  { text: "Le vrai déclic qui te fait enfin passer à l'achat :",
+    a: { auto:"Assez de preuves pour ne plus douter", elev:"Le sentiment que c'est le moment de franchir un cap", lib:"La certitude de pouvoir annuler si tu changes d'avis", oval:"La certitude d'obtenir vite ce que tu cherches", oprix:"Le sentiment de faire une bonne affaire" },
+    order: ["lib","oval","oprix","auto","elev"] }
+];
+
+const CAT_LABELS = { auto:"Automatiseur", elev:"Élévateur", lib:"Libérateur", oval:"Optimiseur Valeur", oprix:"Optimiseur Prix" };
+
+/* ============ CONFIG READ ============ */
+const params = new URLSearchParams(window.location.search);
+const DEFAULT_FS = 'mlgogblo';
+const FS = params.get('fs') || DEFAULT_FS;
+const MAGNET = params.get('magnet');   // lead magnet URL
+const SRC = params.get('src') || '';   // optional source label
+
+const screensEl = document.getElementById('screens');
+const progressTrack = document.getElementById('progressTrack');
+const progressFill = document.getElementById('progressFill');
+
+let current = 0;
+let answers = [];      // { cat, qIndex }
+let catFirstSeen = {};
+
+function showScreen(html, { progress } = {}) {
+  screensEl.innerHTML = `<div class="screen active animate-in">${html}</div>`;
+  if (progress != null) {
+    progressTrack.style.display = 'block';
+    progressFill.style.width = progress + '%';
+  } else {
+    progressTrack.style.display = 'none';
+  }
+}
+
+/* ============ CONFIG MODE (no fs param) ============ */
+function renderConfigMode() {
+  showScreen(`
+    <p class="cfg-title">Configurer un nouveau lien</p>
+    <p class="cfg-sub">Ton Formspree (${DEFAULT_FS}) est déjà branché — les notifications t'arrivent automatiquement. Il ne reste que le lead magnet à renseigner.</p>
+    <div class="field-group">
+      <label class="field-label">Ton identifiant Formspree</label>
+      <input type="text" id="cfgFs" placeholder="ex : mlgogblo">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Lien vers ton lead magnet (ebook, PDF...)</label>
+      <input type="text" id="cfgMagnet" placeholder="https://...">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Source (optionnel — ex : linkedin, facebook)</label>
+      <input type="text" id="cfgSrc" placeholder="linkedin">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-accent" id="cfgGenerate">Générer le lien</button>
+    </div>
+    <div class="cfg-out" id="cfgOut"></div>
+    <button class="btn btn-ghost" id="cfgCopy" style="display:none; margin-top:8px;">Copier le lien</button>
+  `);
+  document.getElementById('cfgGenerate').onclick = () => {
+    const fs = document.getElementById('cfgFs').value.trim();
+    const magnet = document.getElementById('cfgMagnet').value.trim();
+    const src = document.getElementById('cfgSrc').value.trim();
+    if (!magnet) { alert("Le lien du lead magnet est obligatoire."); return; }
+    const url = new URL(window.location.href.split('?')[0]);
+    if (fs) url.searchParams.set('fs', fs);
+    url.searchParams.set('magnet', magnet);
+    if (src) url.searchParams.set('src', src);
+    const out = document.getElementById('cfgOut');
+    out.style.display = 'block';
+    out.textContent = url.toString();
+    const copyBtn = document.getElementById('cfgCopy');
+    copyBtn.style.display = 'block';
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(url.toString()).then(() => {
+        copyBtn.textContent = 'Copié !';
+        setTimeout(() => { copyBtn.textContent = 'Copier le lien'; }, 1500);
+      });
+    };
+  };
+}
+
+/* ============ CLIENT MODE ============ */
+function renderIntro() {
+  showScreen(`
+    <p class="intro-eyebrow">Moment Troc</p>
+    <p class="intro-hook">Une offre à −70 % apparaît devant toi.<br>Tu cliques, ou tu hésites ?</p>
+    <p class="intro-sub">La façon dont tu réponds à ça révèle exactement comment tu décides d'acheter — et pourquoi certaines offres te convainquent alors que d'autres, pourtant meilleures, te laissent froid.</p>
+    <p class="intro-sub" style="margin-top:14px;">8 situations. Deux minutes. À la fin, un guide pour toi.</p>
+    <div class="btn-row">
+      <button class="btn btn-accent" id="startBtn">Commencer</button>
+    </div>
+  `);
+  document.getElementById('startBtn').onclick = () => { current = 0; renderQuestion(); };
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[current];
+  const answersHtml = q.order.map(catKey => `
+    <button class="answer" data-cat="${catKey}">${q.a[catKey]}</button>
+  `).join('');
+  showScreen(`
+    <p class="q-count">${current + 1} / ${QUESTIONS.length}</p>
+    <p class="q-text">${q.text}</p>
+    <div class="answers">${answersHtml}</div>
+  `, { progress: Math.round((current / QUESTIONS.length) * 100) });
+
+  document.querySelectorAll('.answer').forEach(btn => {
+    btn.onclick = () => {
+      const cat = btn.getAttribute('data-cat');
+      if (!(cat in catFirstSeen)) catFirstSeen[cat] = current;
+      answers.push({ cat, qIndex: current });
+      setTimeout(() => {
+        current++;
+        if (current < QUESTIONS.length) renderQuestion();
+        else renderContactForm();
+      }, 180);
+    };
+  });
+}
+
+function computeProfile() {
+  const counts = {};
+  CATS.forEach(c => counts[c] = 0);
+  answers.forEach(a => counts[a.cat]++);
+  let best = null, bestCount = -1;
+  CATS.forEach(c => {
+    if (counts[c] > bestCount || (counts[c] === bestCount && catFirstSeen[c] < catFirstSeen[best])) {
+      best = c; bestCount = counts[c];
+    }
+  });
+  return best;
+}
+
+function renderContactForm() {
+  showScreen(`
+    <p class="q-count">Dernière étape</p>
+    <p class="q-text">Où t'envoyer ton guide ?</p>
+    <div class="field-group">
+      <label class="field-label">Prénom</label>
+      <input type="text" id="cName" required>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Email</label>
+      <input type="email" id="cEmail" required>
+    </div>
+    <div class="field-group">
+      <label class="field-label">WhatsApp (optionnel)</label>
+      <input type="tel" id="cPhone" placeholder="+242...">
+    </div>
+    <p class="error-text" id="cError">Merci de renseigner ton prénom et un email valide.</p>
+    <div class="btn-row">
+      <button class="btn btn-go" id="cSubmit">Recevoir mon guide</button>
+      <p style="text-align:center; font-size:0.76rem; color:var(--muted); margin:2px 0 0;">Juste pour t'envoyer ton guide — rien d'autre.</p>
+    </div>
+  `, { progress: 100 });
+
+  document.getElementById('cSubmit').onclick = async () => {
+    const name = document.getElementById('cName').value.trim();
+    const email = document.getElementById('cEmail').value.trim();
+    const phone = document.getElementById('cPhone').value.trim();
+    const errorEl = document.getElementById('cError');
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!name || !emailOk) { errorEl.style.display = 'block'; return; }
+    errorEl.style.display = 'none';
+
+    const profile = computeProfile();
+    submitLead({ name, email, phone, profile });
+  };
+}
+
+async function submitLead({ name, email, phone, profile }) {
+  showScreen(`<div class="spinner"></div>`, { progress: 100 });
+
+  let country = '';
+  try {
+    const geo = await fetch('https://ipapi.co/json/').then(r => r.json());
+    country = geo.country_name || '';
+  } catch (e) { /* silently continue without country */ }
+
+  try {
+    const res = await fetch(`https://formspree.io/f/${FS}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        name, email, phone, country,
+        profil_interne: CAT_LABELS[profile],
+        source: SRC
+      })
+    });
+    if (!res.ok) throw new Error('first attempt failed');
+  } catch (e) {
+    // une seule nouvelle tentative, silencieuse — on ne bloque jamais la remise du lead magnet
+    try {
+      await fetch(`https://formspree.io/f/${FS}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ name, email, phone, country, profil_interne: CAT_LABELS[profile], source: SRC, retry: true })
+      });
+    } catch (e2) {
+      console.error('Formspree submission failed twice — lead may be lost:', { name, email, phone });
+    }
+  }
+
+  renderFinal();
+}
+
+function renderFinal() {
+  showScreen(`
+    <div class="final-icon">✓</div>
+    <p class="final-title">C'est prêt.</p>
+    <p class="final-sub">Ton guide t'attend juste ici. Regarde aussi ton email, on t'y a envoyé une copie.</p>
+    <div class="btn-row">
+      <a class="btn btn-go" style="text-decoration:none; display:block;" href="${MAGNET || '#'}" target="_blank">Télécharger mon guide</a>
+    </div>
+  `, { progress: 100 });
+}
+
+/* ============ BOOT ============ */
+if (!FS || !MAGNET) {
+  renderConfigMode();
+} else {
+  renderIntro();
+}
+</script>
+</body>
+</html>
